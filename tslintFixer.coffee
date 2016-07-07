@@ -7,7 +7,6 @@ execSync = require('child_process').execSync
 c = console
 
 help = ->
-    c.log "Usage: In v4 run tslint recursively"
     c.log "> tslint -c tslint.json **/*.ts > tslintout.txt"
     c.log "Then run the fixer"
     c.log "> coffee tslintFixer.coffee tslintout.txt"
@@ -41,7 +40,7 @@ fixSingleLineIssue = (line, issue, colNum, tslintLine) ->
         char = {semicolon: ";", whitespace: " "}[matches[1]]
         line = line.substr(0, colNum) + char + line.substr(colNum)
 
-    else if (matches = issue.match(/^expected nospace in (call-signature|index-signature|variable-declaration|property-declaration|parameter)$/))
+    else if (matches = issue.match(/^expected nospace (in|before) /))
         if line[colNum] is " "
             line = line.substr(0, colNum) + line.substr(colNum + 1)
 
@@ -50,16 +49,20 @@ fixSingleLineIssue = (line, issue, colNum, tslintLine) ->
         if line.substr(colNum, findStr.length) == findStr
             line = line.substr(0, colNum) + replaceStr + line.substr(colNum + findStr.length)
 
-    else if (matches = issue is "' should be \"")
-        if line[colNum] is "'"
-            endIndex = line.indexOf("'", colNum + 1)
-            line = line.substr(0, colNum) + '"' + line.substr(colNum + 1)
-            line = line.substr(0, endIndex) + '"' + line.substr(endIndex + 1) 
+    else if (matches = issue.match(/^('|") should be ('|")$/))
+        [_, findStr, replaceStr] = matches
+        if line[colNum] is findStr
+            endIndex = line.indexOf(findStr, colNum + 1)
+            line = line.substr(0, colNum) + replaceStr + line.substr(colNum + 1)
+            line = line.substr(0, endIndex) + replaceStr + line.substr(endIndex + 1)
+
+    else
+        c.log("Ignoring: #{tslintLine}, #{issue}")
 
     return line
 
 fixMultiLineIssue = (fileLines, issue, lineNum, tslintLine) ->
-    if issue is "consecutive blank lines are disallowed"
+    if issue.match(/^consecutive blank lines are (disallowed|forbidden)/)
         # loop to find all consecutive blank lines
         endLineNum = lineNum
         while endLineNum < fileLines.length and fileLines[endLineNum].match(/^\s*$/)
@@ -81,11 +84,15 @@ processTslintOutput = (tslintOutFile) ->
 
     # group isues by filePath and lineNum
     for tslintLine in tslintLines
-        matches = tslintLine.match(/^(.*\.ts)\[(\d+), (\d+)\]: (.*)/)
-        if not matches then throw new Error("Unrecognized line: " + tslintLine)
+        matches = tslintLine.match(/([\\\/\w\.\-]+\.ts)\[(\d+), (\d+)\]: (.*)/)
+        if not matches
+            console.error("Unrecognized line: " + tslintLine)
+            continue
+
         [_, filePath, lineNum, colNum, issue] = matches
         lineNum = parseInt(lineNum) - 1 # -1 for array index access
         colNum = parseInt(colNum) - 1
+        issue = issue.toLowerCase()
 
         if not issueMap[filePath] then issueMap[filePath] = {}
         if not issueMap[filePath][lineNum] then issueMap[filePath][lineNum] = []
@@ -107,7 +114,7 @@ processTslintOutput = (tslintOutFile) ->
             for issue in issues
                 lineAfter = fixSingleLineIssue(lineAfter, issue.issue, issue.colNum, issue.tslintLine)
                 if lineBefore isnt lineAfter then lineEdited = true
-            
+
             # print before/after for every edited line
             if lineEdited
                 fileEdited = true
@@ -115,16 +122,13 @@ processTslintOutput = (tslintOutFile) ->
                 c.log "\n", issue.tslintLine, "\nBefore: ", lineBefore.trim(), "\nAfter:  ", lineAfter.trim()
 
             # multiline issues change line numbers so we only apply if they are the only issue
-            if issues.length == 1 and issues[0].issue is "consecutive blank lines are disallowed"
+            if issues.length == 1 and issues[0].issue.match(/^consecutive blank lines/)
                 numLinesBefore = fileLines.length
                 fileLines = fixMultiLineIssue(fileLines, issues[0].issue, lineNum, issues[0].tslintLine)
                 if numLinesBefore isnt fileLines.length then fileEdited = true
 
         # if file is not writable, mark for edit and save
         if fileEdited
-            try fs.accessSync(filePath, fs.W_OK)
-            catch e then exec( "sd edit #{filePath}")
-
             contents = fileLines.join("\r\n") # windows format
             fs.writeFileSync(filePath, contents, 'utf-8')
 
@@ -132,4 +136,3 @@ processTslintOutput = (tslintOutFile) ->
 ### main ###
 if process.argv.length < 3 then help()
 processTslintOutput(process.argv[2])
-
