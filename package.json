@@ -1,0 +1,37 @@
+{
+  "name": "tslint-fix",
+  "version": "0.1.0",
+  "description": "tslint-fix takes output of tslint and fixes the errors.",
+  "main": "src/tslint-fix.js",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "istanbul cover node_modules/.bin/_mocha -- -R spec test/*.test.js",
+    "test-debug": "mocha --debug-brk -R spec test/*.test.js",
+    "coveralls": "cat coverage/lcov.info | node_modules/.bin/coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nojvek/tslint-fix"
+  },
+  "keywords": [
+    "tslint",
+    "fix",
+    "auto",
+    "fixer",
+    "magic"
+  ],
+  "author": "nojvek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nojvek/tslint-fix/issues"
+  },
+  "homepage": "https://github.com/nojvek/tslint-fix#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.11",
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4"
+  }
+}
