@@ -3,7 +3,6 @@
 [![Coverage Status](https://img.shields.io/coveralls/nojvek/tslint-fix/master.svg)](https://coveralls.io/github/nojvek/tslint-fix?branch=master)
 [![issues open](https://img.shields.io/github/issues/nojvek/tslint-fix.svg)](https://github.com/nojvek/tslint-fix/issues)
 [![npm total downloads](https://img.shields.io/npm/dt/tslint-fix.svg?maxAge=2592000)](https://www.npmjs.com/package/tslint-fix)
-[![licence](https://img.shields.io/npm/tslint-fix.svg?maxAge=2592000)](https://github.com/nojvek/tslint-fix)
 [![npm version](https://img.shields.io/npm/v/tslint-fix.svg)](https://www.npmjs.com/package/tslint-fix)
 tslint-fix takes output of tslint and fixes the errors. It does so by regex matching the errors for file, line, column, error and fixing simple formatting related errors.
 
