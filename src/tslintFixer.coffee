@@ -3,6 +3,7 @@ tslintFixer parses the output of tslint and automatically fixes the issues
 ###
 
 fs = require 'fs'
+os = require 'os'
 execSync = require('child_process').execSync
 c = console
 
@@ -129,7 +130,7 @@ processTslintOutput = (tslintOutFile) ->
 
         # if file is not writable, mark for edit and save
         if fileEdited
-            contents = fileLines.join("\r\n") # windows format
+            contents = fileLines.join(os.EOL)
             fs.writeFileSync(filePath, contents, 'utf-8')
 
 
