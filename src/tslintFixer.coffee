@@ -32,6 +32,10 @@ fixSingleLineIssue = (line, issue, colNum, tslintLine) ->
         if line[colNum] is ","
             line = line.substr(0, colNum) + line.substr(colNum + 1)
 
+    else if (issue is "unnecessary semicolon")
+        if line[colNum] is ";"
+            line = line.substr(0, colNum) + line.substr(colNum + 1)
+
     else if issue is "comment must start with a space"
         if line.substr(colNum - 2, 2) is "//"
             line = line.substr(0, colNum) + " " + line.substr(colNum)
