@@ -1,6 +1,6 @@
 {
   "name": "tslint-fix",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "tslint-fix takes output of tslint and fixes the errors.",
   "main": "lib/tslint-fix.js",
   "bin" : { "tslint-fix" : "./lib/tslint-fix.js" },
